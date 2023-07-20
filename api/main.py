@@ -7,7 +7,8 @@ import os
 import pathlib
 from google.oauth2 import service_account
 from modal import Dict, Image, SharedVolume, Stub, asgi_app, Secret
-from . import audio, config, video, gcloud, pdf
+from . import audio, config, video, gcloud, pdf, supabase
+from typing import Optional
 
 #from dotenv import load_dotenv
 #load_dotenv()
@@ -27,7 +28,8 @@ app_image = (
         "torchaudio",
         "yt-dlp",
         "fpdf",
-        "google-cloud-storage"
+        "google-cloud-storage",
+        "supabase"
     )
     .apt_install("ffmpeg")
     .pip_install("ffmpeg-python")
@@ -108,7 +110,10 @@ def transcribe_segment(
 def transcribe_audio(
     audio_filepath: pathlib.Path,
     result_path: pathlib.Path,
-    model: config.ModelSpec
+    model: config.ModelSpec,
+    unique_id: int,
+    session_title: Optional[str] = None,
+    presenters: Optional[str] = None,
 ):
     segment_gen = audio.split_silences(str(audio_filepath))
 
@@ -130,8 +135,8 @@ def transcribe_audio(
     with open(result_path, "w") as f:
         json.dump(result, f, indent=4)
 
-    # Get the title slug from the audio file path
-    title_slug = os.path.basename(audio_filepath).rsplit('.', 1)[0]
+    # Get the title slug from the unique_id
+    title_slug = str(unique_id)
 
     # Create a PDF
     pdf_path = pdf.create_pdf(output_text, title_slug)
@@ -143,6 +148,10 @@ def transcribe_audio(
     # Upload the PDF to Gcloud and get the public url
     public_url = gcloud.upload_to_gcloud(pdf_path, credentials)
 
+    # Upsert the transcript to Supabase
+    supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, public_url, audio_filepath, public_url)
+
+
     return public_url
 
 
@@ -151,10 +160,13 @@ def transcribe_audio(
     shared_volumes={config.CACHE_DIR: volume},
     timeout=900,
 )
-def process_audio(src_url: str, title_slug: str, is_video: bool, password: str):
+def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
     import dacite
     import whisper
     import yt_dlp
+
+    # Get the title slug from the unique_id
+    title_slug = str(unique_id)
 
     destination_path = config.RAW_AUDIO_DIR / title_slug
 
@@ -190,7 +202,11 @@ def process_audio(src_url: str, title_slug: str, is_video: bool, password: str):
             audio_filepath=audio_filepath,
             result_path=transcription_path,
             model=model,
+            unique_id=unique_id,
+            session_title=session_title,
+            presenters=presenters
         )
+
     except Exception as e:
         logger.exception(e)
         raise dacite.DaciteError("Failed to process audio") from e

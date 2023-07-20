@@ -7,10 +7,16 @@ def create_pdf(transcript, title_slug):
     pdf.add_page()
 
     # Set font
-    pdf.set_font("Arial", size = 15)
+    pdf.set_font("Arial", size=15)
 
-    # Add a cell
-    pdf.cell(200, 10, txt = transcript, ln = True, align = 'C')
+    # Get the available page width
+    page_width = pdf.w - 2 * pdf.l_margin
+
+    # Calculate the maximum width of the cell based on available page width
+    max_cell_width = page_width - 2 * pdf.c_margin
+
+    # Add a cell with adjusted width
+    pdf.multi_cell(max_cell_width, 10, txt=transcript, align='C')
 
     # Save the pdf with name .pdf
     pdf_path = f"{title_slug}.pdf"

@@ -23,6 +23,7 @@ fpdf = "^1.7.2"
 google-cloud-storage = "^2.10.0"
 modal = "^0.50.2668"
 whisper = "^1.1.10"
+supabase = "^1.0.3"
 
 
 [tool.poetry.group.dev.dependencies]

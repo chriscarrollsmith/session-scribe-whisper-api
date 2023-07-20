@@ -105,7 +105,10 @@ def transcribe_segment(
     image=app_image,
     shared_volumes={config.CACHE_DIR: volume},
     timeout=900,
-    secret=Secret.from_name("my-googlecloud-secret"),
+    secrets=[
+        Secret.from_name("my-googlecloud-secret"),
+        Secret.from_name("supabase")
+    ],
 )
 def transcribe_audio(
     audio_filepath: pathlib.Path,
@@ -149,8 +152,7 @@ def transcribe_audio(
     public_url = gcloud.upload_to_gcloud(pdf_path, credentials)
 
     # Upsert the transcript to Supabase
-    supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, public_url, audio_filepath, public_url)
-
+    supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, audio_filepath, public_url)
 
     return public_url
 

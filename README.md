@@ -6,7 +6,7 @@
 
 > “The Whisper architecture is a simple end-to-end approach, implemented as an encoder-decoder Transformer. Input audio is split into 30-second chunks, converted into a log-Mel spectrogram, and then passed into an encoder.” - Introducing Whisper
 
-### How to use
+### How to develop
 
 1. Create a Modal account and get your API key.
 
@@ -27,24 +27,28 @@
    modal deploy api.main
    ```
 
-3. Transcribe your audio file using the following curl commands. Right now only the URL-formatted version is supported.
+### How to use
+
+1. Transcribe your audio file using the following curl commands. There are two endpoints. the 'transcribe' endpoint wants a URL formatted request:
 
   ```curl
-  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \
+  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=123456&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
+
+  ```
+
+  The 'transcribe2' endpoint wants a JSON formatted request:
+
+  ```curl
+  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe2' \
   --header 'Content-Type: application/json' \
   --data-raw '{
-      "src_url": "https://storage.googleapis.com/session-scribe-bucket/disciple.wav",
-      "unique_id": 123456,
+      "src_url": "https://storage.googleapis.com/session-scribe-bucket/demo.mp3",
+      "unique_id": 987654,
       "session_title": "Session Title Here",
       "presenters": "Presenters Here",
       "is_video": false
   }'
   ```
-
-   ```curl
-   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=123456&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
-
-   ```
 
    Sample response:
 

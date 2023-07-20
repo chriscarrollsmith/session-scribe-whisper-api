@@ -32,7 +32,7 @@
 1. Transcribe your audio file using the following curl commands. There are two endpoints. the 'transcribe' endpoint wants a URL formatted request:
 
   ```curl
-  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=123456&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
+  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=3245786&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
 
   ```
 
@@ -42,7 +42,7 @@
   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe2' \
   --header 'Content-Type: application/json' \
   --data-raw '{
-      "src_url": "https://storage.googleapis.com/session-scribe-bucket/demo.mp3",
+      "src_url": "https://storage.googleapis.com/session-scribe-bucket/disciple.wav",
       "unique_id": 987654,
       "session_title": "Session Title Here",
       "presenters": "Presenters Here",

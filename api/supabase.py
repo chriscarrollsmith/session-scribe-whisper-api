@@ -8,6 +8,10 @@ def supabase_upsert(unique_id: str, session_name: str, presenters: str, transcri
     key: str = os.getenv("SUPABASE_SERVICE_ROLE")
     supabase = create_client(url, key)
     
+    # Convert PosixPath objects to strings
+    audio_file_path = str(audio_file_path)
+    transcript_file_path = str(transcript_file_path)
+    
     created_at = datetime.now().isoformat()
 
     try:

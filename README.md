@@ -27,7 +27,7 @@
    modal deploy api.main
    ```
 
-3. Transcribe your audio file using the following curl command. Replace the `your-modal-endpoint`, `your-audio-src-url`, `title_slug`, and `is_video`(for video transcribe) with your own.
+3. Transcribe your audio file using the following curl commands. Right now only the URL-formatted version is supported.
 
   ```curl
   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \

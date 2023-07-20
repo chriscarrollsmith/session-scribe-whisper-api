@@ -29,72 +29,27 @@
 
 3. Transcribe your audio file using the following curl command. Replace the `your-modal-endpoint`, `your-audio-src-url`, `title_slug`, and `is_video`(for video transcribe) with your own.
 
+  ```curl
+  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "src_url": "https://storage.googleapis.com/session-scribe-bucket/disciple.wav",
+      "unique_id": 123456,
+      "session_title": "Session Title Here",
+      "presenters": "Presenters Here",
+      "is_video": false
+  }'
+  ```
+
    ```curl
-   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&title_slug=disciple_test&is_video=false'
+   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=123456&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
+
    ```
 
    Sample response:
 
    ```json
    {
-     "call_id": "your-call-id"
+     "job_id": "your-job-id"
    }
    ```
-
-4. Check the status of your transcription using the following curl command. Replace the `your-call-id` with your own (return from the previous command).
-
-   ```curl
-    curl --location 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/status/your-call-id'
-   ```
-
-   Sample initial response:
-
-   ```json
-   {
-     "finished": false,
-     "total_segments": 49,
-     "tasks": 49,
-     "done_segments": 0
-   }
-   ```
-
-   Sample final response(poll this endpoint until `finished` is `true`):
-
-   ```json
-   {
-     "finished": true,
-     "total_segments": 49,
-     "tasks": 49,
-     "done_segments": 49
-   }
-   ```
-
-5. Download the transcription using the following curl command. Replace the `your-modal-endpoint` and `your-title-slug` with your own (return from the previous command).
-
-   ```curl
-    curl --location 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/audio/your-title-slug'
-   ```
-
-   Sample response:
-
-   ```json
-   {
-     "segments": [
-       {
-         "text": " Productivity also means that you're able to maximize the hours that you have and also rest deliberately in between.  That's real productivity because if you're just constantly working without breaks and without really knowing what your goals are and what you're achieving,",
-         "start": 0.0,
-         "end": 19.0
-       },
-       {
-         "text": " that's not productivity, that's just busyness.  So that's the difference between productivity and busyness and it really starts from the very beginning of your day.",
-         "start": 19.0,
-         "end": 45.0
-       }
-     ]
-   }
-   ```
-
-Resources:
-
-- https://modal.com/docs/guide/whisper-transcriber (most of the codes were recycled from here)
-- https://openai.com/blog/whisper/

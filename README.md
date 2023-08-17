@@ -2,11 +2,9 @@
 
 ## Powered by Modal.com for parallel processing on-demand, an hour audio file can be transcribed in ~1 minute.
 
-"Modal’s dead-simple parallelism primitives are the key to doing the transcription so quickly. Even with a GPU, transcribing a full episode serially was taking around 10 minutes. But by pulling in ffmpeg with a simple .pip_install("ffmpeg-python") addition to our Modal Image, we could exploit the natural silences of the podcast medium to partition episodes into hundreds of short segments. Each segment is transcribed by Whisper in its own container task with 2 physical CPU cores, and when all are done we stitch the segments back together with only a minimal loss in transcription quality. This approach actually accords quite well with Whisper’s model architecture:"
+"Modal’s dead-simple parallelism primitives are the key to doing the transcription so quickly. Even with a GPU, transcribing a full episode serially was taking around 10 minutes. But by pulling in ffmpeg with a simple .pip_install("ffmpeg-python") addition to our Modal Image, we could exploit the natural silences of the podcast medium to partition episodes into hundreds of short segments. Each segment is transcribed by Whisper in its own container task with 2 physical CPU cores, and when all are done we stitch the segments back together with only a minimal loss in transcription quality. This approach actually accords quite well with Whisper’s model architecture." The model uses 30-second chunking.
 
-> “The Whisper architecture is a simple end-to-end approach, implemented as an encoder-decoder Transformer. Input audio is split into 30-second chunks, converted into a log-Mel spectrogram, and then passed into an encoder.” - Introducing Whisper
-
-### How to develop
+## How to develop
 
 1. Create a Modal account and get your API key.
 
@@ -27,7 +25,14 @@
    modal deploy api.main
    ```
 
-### How to use
+### To-do items
+
+[ ] I want to do some pseudocode and some refactoring to make this more maintainable
+[ ] I want to investigate other models or Whisper extensions that allow for time-stamping and diarization (i.e., speaker identification). In particular, see [WhisperX](https://github.com/m-bain/whisperX). Also look at [pyannote](https://github.com/pyannote/pyannote-audio) (tutorial on pyannote diarization [here](https://lablab.ai/t/whisper-transcription-and-speaker-identification)).
+[ ] I want to investigate saving the audio files in Google Cloud so we can serve them for download if an event organizer chooses to do that.
+[ ] I want to implement an outgoing API endpoint here to ping a Vercel webhook when transcription is complete.
+
+## How to use
 
 1. Transcribe your audio file using the following curl commands. There are two endpoints. the 'transcribe' endpoint wants a URL formatted request:
 

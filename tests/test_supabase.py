@@ -1,4 +1,4 @@
-from api import supabase  # replace with the actual module name
+from whisper_api import supabase  # replace with the actual module name
 from dotenv import load_dotenv
 import os
 

@@ -3,7 +3,7 @@ import json
 import tempfile
 from google.cloud import storage
 from google.oauth2 import service_account
-from api import gcloud
+from whisper_api import gcloud
 import pytest
 from dotenv import load_dotenv
 

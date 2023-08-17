@@ -1,5 +1,5 @@
 import os
-from api import pdf
+from whisper_api import pdf
 import epson_connect
 from dotenv import load_dotenv
 

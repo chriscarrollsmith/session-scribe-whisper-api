@@ -96,7 +96,8 @@
    - Converts the `audio_file_path` and `transcript_file_path` from PosixPath objects to strings.
    - Gets the current date and time in ISO format.
    - Tries to insert a new row into the 'transcripts' table with the provided data.
-   - Returns the inserted data.
+   - If an error occurs during the insertion, it raises an exception with the error message.
+   - Returns the inserted data if the insertion is successful.
 
 # video.py
 1. Import necessary libraries and modules.

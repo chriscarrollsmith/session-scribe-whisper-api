@@ -34,17 +34,10 @@
 
 ## How to use
 
-1. Transcribe your audio file using the following curl commands. There are two endpoints. the 'transcribe' endpoint wants a URL formatted request:
+1. Transcribe your audio file using the following curl command. The 'transcribe' endpoint wants a JSON formatted request:
 
   ```curl
-  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe?src_url=https://storage.googleapis.com/session-scribe-bucket/disciple.wav&unique_id=3245786&session_title=Session%20Title%20Here&presenters=Presenters%20Here&is_video=false'
-
-  ```
-
-  The 'transcribe2' endpoint wants a JSON formatted request:
-
-  ```curl
-  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe2' \
+  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \
   --header 'Content-Type: application/json' \
   --data-raw '{
       "src_url": "https://storage.googleapis.com/session-scribe-bucket/disciple.wav",

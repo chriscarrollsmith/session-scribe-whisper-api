@@ -27,7 +27,8 @@
 
 ### To-do items
 
-[ ] I want to do some pseudocode and some refactoring to make this more maintainable
+[x] I want to do some pseudocode and some refactoring to make this more maintainable
+[ ] Make sure old imports from config.py now point to constants.py or logger.py
 [ ] I want to investigate other models or Whisper extensions that allow for time-stamping and diarization (i.e., speaker identification). In particular, see [WhisperX](https://github.com/m-bain/whisperX). Also look at [pyannote](https://github.com/pyannote/pyannote-audio) (tutorial on pyannote diarization [here](https://lablab.ai/t/whisper-transcription-and-speaker-identification)).
 [ ] I want to investigate saving the audio files in Google Cloud so we can serve them for download if an event organizer chooses to do that.
 [ ] I want to implement an outgoing API endpoint here to ping a Vercel webhook when transcription is complete.

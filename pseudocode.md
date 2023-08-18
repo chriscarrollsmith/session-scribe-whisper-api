@@ -104,3 +104,38 @@
    - Sets the options for the YoutubeDL object, including the format, postprocessors, video password, and output template.
    - Tries to download the video from the provided URL and convert it to audio.
    - Logs the start and end of the download process.
+
+# test_gcloud.py
+1. Import necessary libraries and modules.
+2. Load environment variables.
+3. Define a function `test_gcloud_upload_and_delete()` that:
+   - Loads the Google Cloud credentials from the environment variable.
+   - Defines the bucket name.
+   - Creates a dummy file for testing.
+   - Uploads the dummy file to Google Cloud Storage.
+   - Verifies that the file was uploaded correctly by downloading it to a new location.
+   - Checks if the content of the downloaded file matches the original.
+   - Deletes the file from Google Cloud Storage.
+   - Verifies that the file was deleted correctly by attempting to download it again.
+   - Cleans up the local dummy files.
+
+# test_pdf.py
+1. Import necessary libraries and modules.
+2. Load environment variables.
+3. Define a function `test_create_pdf_and_print()` that:
+   - Prepares the inputs.
+   - Calls the `create_pdf` function.
+   - Verifies that the PDF file was created.
+   - Initializes the Epson Connect client.
+   - Prints the PDF and gets the job id.
+   - Checks if a job_id was returned.
+   - Cleans up the PDF file.
+
+# test_supabase.py
+1. Import necessary libraries and modules.
+2. Load environment variables.
+3. Define a function `test_supabase_upsert()` that:
+   - Checks that the Supabase URL and service role are set in the environment variables.
+   - Defines the details for the test entry to be inserted.
+   - Calls the `supabase_upsert` function.
+   - Checks that the returned data matches the inserted entry.

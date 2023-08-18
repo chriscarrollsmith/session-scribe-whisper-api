@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Body, HTTPException
-from . import config
+from . import logger
 from .main import process_audio
 from typing import Optional
 from pydantic import BaseModel
 
-logger = config.get_logger(__name__)
+logger = logger.get_logger(__name__)
 web_app = FastAPI()
 
 # Function removed

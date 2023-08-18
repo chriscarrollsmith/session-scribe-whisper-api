@@ -7,13 +7,13 @@ import os
 import pathlib
 from google.oauth2 import service_account
 from modal import Dict, Image, SharedVolume, Stub, asgi_app, Secret
-from . import audio, config, video, gcloud, pdf, supabase
+from . import audio, logger, video, gcloud, pdf, supabase
 from typing import Optional
 
 #from dotenv import load_dotenv
 #load_dotenv()
 
-logger = config.get_logger(__name__)
+logger = logger.get_logger(__name__)
 volume = SharedVolume().persist("dataset-cache-vol")
 
 app_image = (
@@ -44,7 +44,7 @@ stub.in_progress = Dict()
 
 
 @stub.function(
-    shared_volumes={config.CACHE_DIR: volume},
+    shared_volumes={logger.CACHE_DIR: volume},
     keep_warm=1,
 )
 @asgi_app()
@@ -56,14 +56,14 @@ def fastapi_app():
 
 @stub.function(
     image=app_image,
-    shared_volumes={config.CACHE_DIR: volume},
+    shared_volumes={logger.CACHE_DIR: volume},
     cpu=2,
 )
 def transcribe_segment(
     start: float,
     end: float,
     audio_filepath: pathlib.Path,
-    model: config.ModelSpec,
+    model: logger.ModelSpec,
 ):
     import tempfile
     import time
@@ -85,7 +85,7 @@ def transcribe_segment(
         use_gpu = torch.cuda.is_available()
         device = "cuda" if use_gpu else "cpu"
         model = whisper.load_model(
-            model.name, device=device, download_root=config.MODEL_DIR
+            model.name, device=device, download_root=logger.MODEL_DIR
         )
         result = model.transcribe(f.name, language="en", fp16=use_gpu)  # type: ignore
 
@@ -103,7 +103,7 @@ def transcribe_segment(
 
 @stub.function(
     image=app_image,
-    shared_volumes={config.CACHE_DIR: volume},
+    shared_volumes={logger.CACHE_DIR: volume},
     timeout=900,
     secrets=[
         Secret.from_name("my-googlecloud-secret"),
@@ -113,7 +113,7 @@ def transcribe_segment(
 def transcribe_audio(
     audio_filepath: pathlib.Path,
     result_path: pathlib.Path,
-    model: config.ModelSpec,
+    model: logger.ModelSpec,
     unique_id: int,
     session_title: Optional[str] = None,
     presenters: Optional[str] = None,
@@ -159,7 +159,7 @@ def transcribe_audio(
 
 @stub.function(
     image=app_image,
-    shared_volumes={config.CACHE_DIR: volume},
+    shared_volumes={logger.CACHE_DIR: volume},
     timeout=900,
 )
 def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
@@ -170,7 +170,7 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
     # Get the title slug from the unique_id
     title_slug = str(unique_id)
 
-    destination_path = config.RAW_AUDIO_DIR / title_slug
+    destination_path = logger.RAW_AUDIO_DIR / title_slug
 
     # Video files are converted to mp3, so we need to pass the mp3 file path.
     audio_filepath = f"{destination_path}.mp3" if is_video else destination_path
@@ -180,11 +180,11 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
 
         # pre-download the model to the cache path, because the _download fn is not
         # thread-safe.
-        model = config.DEFAULT_MODEL
-        whisper._download(whisper._MODELS[model.name], config.MODEL_DIR, False)
+        model = logger.DEFAULT_MODEL
+        whisper._download(whisper._MODELS[model.name], logger.MODEL_DIR, False)
 
-        config.RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-        config.TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
+        logger.RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+        logger.TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
         if is_video:
             video.download_convert_video_to_audio(
@@ -222,4 +222,4 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
 
 
 def get_transcript_path(title_slug: str) -> pathlib.Path:
-    return config.TRANSCRIPTIONS_DIR / f"{title_slug}.json"
+    return logger.TRANSCRIPTIONS_DIR / f"{title_slug}.json"

@@ -3,9 +3,9 @@ import pathlib
 import urllib.request
 from typing import NamedTuple, TypedDict, Iterator, Tuple
 
-from . import config
+from . import logger
 
-logger = config.get_logger(__name__)
+logger = logger.get_logger(__name__)
 Segment = TypedDict("Segment", {"text": str, "start": float, "end": float})
 
 

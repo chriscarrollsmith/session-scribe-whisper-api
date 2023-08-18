@@ -1,8 +1,8 @@
 import pathlib
 
-from . import config
+from . import logger
 
-logger = config.get_logger(__name__)
+logger = logger.get_logger(__name__)
 
 
 # List of all supported video sites here https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md

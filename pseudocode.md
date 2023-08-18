@@ -77,3 +77,30 @@
    - Deletes the audio file.
    - Returns the public URL of the uploaded PDF.
 9. Define a helper function `get_transcript_path(title_slug)` that returns the path of the transcript file.
+
+# pdf.py
+1. Import the necessary library (FPDF).
+2. Define a function `create_pdf(transcript, title_slug)` that:
+   - Initializes a PDF object.
+   - Adds a page to the PDF.
+   - Sets the font for the PDF.
+   - Calculates the maximum width of the cell based on the available page width.
+   - Adds a cell with the adjusted width and the transcript text.
+   - Saves the PDF with the name `{title_slug}.pdf`.
+   - Returns the path of the saved PDF.
+
+# supabase.py
+1. Import necessary libraries and modules.
+2. Define a function `supabase_upsert(unique_id, session_name, presenters, transcript_text, audio_file_path, transcript_file_path)` that:
+   - Initializes a Supabase client with the URL and key from the environment variables.
+   - Converts the `audio_file_path` and `transcript_file_path` from PosixPath objects to strings.
+   - Gets the current date and time in ISO format.
+   - Tries to insert a new row into the 'transcripts' table with the provided data.
+   - Returns the inserted data.
+
+# video.py
+1. Import necessary libraries and modules.
+2. Define a function `download_convert_video_to_audio(yt_dlp, video_url, password, destination_path)` that:
+   - Sets the options for the YoutubeDL object, including the format, postprocessors, video password, and output template.
+   - Tries to download the video from the provided URL and convert it to audio.
+   - Logs the start and end of the download process.

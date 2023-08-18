@@ -56,23 +56,23 @@
 5. Define a FastAPI application function `fastapi_app()`.
 6. Define a function `transcribe_segment(start, end, audio_filepath, model)` that:
    - Creates a temporary file.
-   - Trims the audio file to the specified start and end times.
+   - Trims the audio file to the specified start and end times using ffmpeg.
    - Loads the Whisper model.
    - Transcribes the audio file using the model.
    - Adds back offsets to the result.
    - Returns the result.
 7. Define a function `transcribe_audio(audio_filepath, result_path, model, unique_id, session_title, presenters)` that:
-   - Splits the audio file into segments.
-   - Transcribes each segment.
+   - Splits the audio file into segments using the `split_silences` function from the `audio` module.
+   - Transcribes each segment using the `transcribe_segment` function.
    - Combines the transcriptions.
    - Writes the transcription to a file.
-   - Creates a PDF from the transcription.
-   - Uploads the PDF to Google Cloud Storage.
-   - Upserts the transcript to Supabase.
+   - Creates a PDF from the transcription using the `create_pdf` function from the `pdf` module.
+   - Uploads the PDF to Google Cloud Storage using the `upload_to_gcloud` function from the `gcloud` module.
+   - Upserts the transcript to Supabase using the `supabase_upsert` function from the `supabase` module.
    - Returns the public URL of the uploaded PDF.
 8. Define a function `process_audio(src_url, unique_id, session_title, presenters, is_video, password)` that:
-   - Downloads and converts the video to audio if it's a video.
-   - Stores the original audio if it's an audio.
+   - Downloads and converts the video to audio if it's a video using the `download_convert_video_to_audio` function from the `video` module.
+   - Stores the original audio if it's an audio using the `store_original_audio` function from the `audio` module.
    - Calls the `transcribe_audio` function.
    - Deletes the audio file.
    - Returns the public URL of the uploaded PDF.

@@ -46,3 +46,34 @@
    - Creates a blob (object) in the bucket with the same name as the file to be uploaded.    
    - Uploads the file to the created blob.
    - Returns the public URL of the uploaded blob.
+
+# main.py Pseudocode
+
+1. Import necessary libraries and modules.
+2. Initialize logger and shared volume.
+3. Define the application image with necessary installations.
+4. Initialize a stub with the application image.
+5. Define a FastAPI application function `fastapi_app()`.
+6. Define a function `transcribe_segment(start, end, audio_filepath, model)` that:
+   - Creates a temporary file.
+   - Trims the audio file to the specified start and end times.
+   - Loads the Whisper model.
+   - Transcribes the audio file using the model.
+   - Adds back offsets to the result.
+   - Returns the result.
+7. Define a function `transcribe_audio(audio_filepath, result_path, model, unique_id, session_title, presenters)` that:
+   - Splits the audio file into segments.
+   - Transcribes each segment.
+   - Combines the transcriptions.
+   - Writes the transcription to a file.
+   - Creates a PDF from the transcription.
+   - Uploads the PDF to Google Cloud Storage.
+   - Upserts the transcript to Supabase.
+   - Returns the public URL of the uploaded PDF.
+8. Define a function `process_audio(src_url, unique_id, session_title, presenters, is_video, password)` that:
+   - Downloads and converts the video to audio if it's a video.
+   - Stores the original audio if it's an audio.
+   - Calls the `transcribe_audio` function.
+   - Deletes the audio file.
+   - Returns the public URL of the uploaded PDF.
+9. Define a helper function `get_transcript_path(title_slug)` that returns the path of the transcript file.

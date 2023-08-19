@@ -1,4 +1,4 @@
-# api.py Pseudocode
+# api.py
 
 1. Import necessary libraries and modules.
 2. Initialize logger and FastAPI application.
@@ -36,7 +36,7 @@
 4. Define a dictionary `supported_whisper_models` that maps model names to their corresponding `ModelSpec` instances.
 5. Define a constant `DEFAULT_MODEL` that refers to the default model to be used, which is the "base.en" model from the `supported_whisper_models` dictionary.
 
-# gcloud.py Pseudocode
+# gcloud.py
 
 1. Import necessary libraries and modules.
 2. Define a function `upload_to_gcloud(pdf_path, credentials, bucket_name='session-scribe-bucket')` that:
@@ -46,7 +46,7 @@
    - Uploads the file to the created blob.
    - Returns the public URL of the uploaded blob.
 
-# main.py Pseudocode
+# main.py
 
 1. Import necessary libraries and modules.
 2. Initialize logger and shared volume.

@@ -52,30 +52,30 @@
 2. Initialize logger and shared volume.
 3. Define the application image with necessary installations.
 4. Initialize a stub with the application image.
-5. Define a FastAPI application function `fastapi_app()`.
+5. Define a FastAPI application function `fastapi_app()`. This function is defined within the main.py module.
 6. Define a function `transcribe_segment(start, end, audio_filepath, model)` that:
    - Creates a temporary file.
-   - Trims the audio file to the specified start and end times using ffmpeg.
-   - Loads the Whisper model.
-   - Transcribes the audio file using the model.
-   - Adds back offsets to the result.
+   - Trims the audio file to the specified start and end times using ffmpeg. This task is performed within the main.py module.
+   - Loads the Whisper model. This task is performed by the imported whisper module.
+   - Transcribes the audio file using the model. This task is performed by the imported whisper module.
+   - Adds back offsets to the result. This task is performed within the main.py module.
    - Returns the result.
 7. Define a function `transcribe_audio(audio_filepath, result_path, model, unique_id, session_title, presenters)` that:
-   - Splits the audio file into segments using the `split_silences` function from the `audio` module.
-   - Transcribes each segment using the `transcribe_segment` function.
-   - Combines the transcriptions.
-   - Writes the transcription to a file.
-   - Creates a PDF from the transcription using the `create_pdf` function from the `pdf` module.
-   - Uploads the PDF to Google Cloud Storage using the `upload_to_gcloud` function from the `gcloud` module.
-   - Upserts the transcript to Supabase using the `supabase_upsert` function from the `supabase` module.
+   - Splits the audio file into segments using the `split_silences` function from the `audio` module. This task is performed by the imported audio module.
+   - Transcribes each segment using the `transcribe_segment` function. This task is performed within the main.py module.
+   - Combines the transcriptions. This task is performed within the main.py module.
+   - Writes the transcription to a file. This task is performed within the main.py module.
+   - Creates a PDF from the transcription using the `create_pdf` function from the `pdf` module. This task is performed by the imported pdf module.
+   - Uploads the PDF to Google Cloud Storage using the `upload_to_gcloud` function from the `gcloud` module. This task is performed by the imported gcloud module.
+   - Upserts the transcript to Supabase using the `supabase_upsert` function from the `supabase` module. This task is performed by the imported supabase module.
    - Returns the public URL of the uploaded PDF.
 8. Define a function `process_audio(src_url, unique_id, session_title, presenters, is_video, password)` that:
-   - Downloads and converts the video to audio if it's a video using the `download_convert_video_to_audio` function from the `video` module.
-   - Stores the original audio if it's an audio using the `store_original_audio` function from the `audio` module.
-   - Calls the `transcribe_audio` function.
-   - Deletes the audio file.
+   - Downloads and converts the video to audio if it's a video using the `download_convert_video_to_audio` function from the `video` module. This task is performed by the imported video module.
+   - Stores the original audio if it's an audio using the `store_original_audio` function from the `audio` module. This task is performed by the imported audio module.
+   - Calls the `transcribe_audio` function. This task is performed within the main.py module.
+   - Deletes the audio file. This task is performed within the main.py module.
    - Returns the public URL of the uploaded PDF.
-9. Define a helper function `get_transcript_path(title_slug)` that returns the path of the transcript file.
+9. Define a helper function `get_transcript_path(title_slug)` that returns the path of the transcript file. This function is defined within the main.py module.
 
 # pdf.py
 1. Import the necessary library (FPDF).

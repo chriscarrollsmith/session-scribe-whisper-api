@@ -23,14 +23,18 @@
 10. Define a helper function `_merge_segments(left: Segment, right: Segment)` that merges two segments into one.
 11. Define a function `split_silences(path: str, min_segment_length: float = 30.0, min_silence_length: float = 1.0)` that splits an audio file into contiguous chunks using the ffmpeg `silencedetect` filter.
 
-# config.py
+# logger.py
+
+1. Import necessary libraries and modules.
+2. Define a function `get_logger(name, level=logging.INFO)` that sets up and returns a logger with a specified name and logging level.
+
+# constants.py
 
 1. Import necessary libraries and modules.
 2. Define a `ModelSpec` dataclass with "name", "params", and "relative_speed" fields.        
-3. Define a function `get_logger(name, level=logging.INFO)` that sets up and returns a logger with a specified name and logging level.
-4. Define several constants for directory paths, such as `CACHE_DIR`, `RAW_AUDIO_DIR`, `AUDIO_METADATA_DIR`, `TRANSCRIPTIONS_DIR`, and `MODEL_DIR`.
-5. Define a dictionary `supported_whisper_models` that maps model names to their corresponding `ModelSpec` instances.
-6. Define a constant `DEFAULT_MODEL` that refers to the default model to be used, which is the "base.en" model from the `supported_whisper_models` dictionary.
+3. Define several constants for directory paths, such as `CACHE_DIR`, `RAW_AUDIO_DIR`, `AUDIO_METADATA_DIR`, `TRANSCRIPTIONS_DIR`, and `MODEL_DIR`.
+4. Define a dictionary `supported_whisper_models` that maps model names to their corresponding `ModelSpec` instances.
+5. Define a constant `DEFAULT_MODEL` that refers to the default model to be used, which is the "base.en" model from the `supported_whisper_models` dictionary.
 
 # gcloud.py Pseudocode
 

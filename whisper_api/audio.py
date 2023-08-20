@@ -37,7 +37,7 @@ def download_audio_file(url: str) -> DownloadResult:
         )
 
 
-def sizeof_fmt(num, suffix="B") -> str:
+def format_file_size(num, suffix="B") -> str:
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
@@ -58,7 +58,7 @@ def store_original_audio(
             return
 
     audio_download_result = download_audio_file(url=url)
-    humanized_bytes_str = sizeof_fmt(num=len(audio_download_result.data))
+    humanized_bytes_str = format_file_size(num=len(audio_download_result.data))
     logger.info(f"Downloaded {humanized_bytes_str} audio from URL.")
     with open(destination, "wb") as f:
         f.write(audio_download_result.data)
@@ -79,7 +79,7 @@ def coalesce_short_transcript_segments(
         if previous is None:
             previous = current
         elif len(previous["text"]) < minimum_transcript_len:
-            previous = _merge_segments(left=previous, right=current)
+            previous = _combine_segments(left=previous, right=current)
         else:
             long_enough_segments.append(previous)
             previous = current
@@ -88,7 +88,7 @@ def coalesce_short_transcript_segments(
     return long_enough_segments
 
 
-def _merge_segments(left: Segment, right: Segment) -> Segment:
+def _combine_segments(left: Segment, right: Segment) -> Segment:
     return {
         "text": left["text"] + " " + right["text"],
         "start": left["start"],

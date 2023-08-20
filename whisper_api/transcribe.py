@@ -5,7 +5,8 @@ import ffmpeg
 import torch
 import whisper
 from . import logger
-import logging
+
+logger = logger.get_logger(__name__)
 
 
 def transcribe_segment(
@@ -13,7 +14,6 @@ def transcribe_segment(
     end: float,
     audio_filepath: pathlib.Path,
     model: logger.ModelSpec,
-    logger: logging.Logger,
 ):
     t0 = time.time()
     with tempfile.NamedTemporaryFile(suffix=".mp3") as f:

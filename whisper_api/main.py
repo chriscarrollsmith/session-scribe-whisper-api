@@ -1,6 +1,6 @@
 """
-Uses OpenAI's Whisper modal to do speech-to-text transcription
-of audio.
+Uses OpenAI's Whisper API to do speech-to-text transcription
+of audio, and Modal for easy containerized deployment of the app.
 """
 import json
 import os
@@ -104,7 +104,7 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
         output_text = ""
         output_segments = []
         for result in transcribe_segment.starmap(
-            segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model, logger=logger)
+            segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model)
         ):
             output_text += result["text"]
             output_segments += result["segments"]
@@ -142,8 +142,6 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
         logger.info(f"Deleted the audio file in '{destination_path}'")
 
     return public_url  # return the public URL of the uploaded PDF
-
-
 
 
 def get_transcript_path(title_slug: str) -> pathlib.Path:

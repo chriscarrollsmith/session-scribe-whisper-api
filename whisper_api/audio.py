@@ -2,8 +2,8 @@ import dataclasses
 import pathlib
 import urllib.request
 from typing import NamedTuple, TypedDict, Iterator, Tuple
-
 from . import logger
+from .constants import SILENCE_DB, MIN_SEGMENT_LENGTH, MIN_SILENCE_LENGTH
 
 logger = logger.get_logger(__name__)
 Segment = TypedDict("Segment", {"text": str, "start": float, "end": float})
@@ -95,10 +95,6 @@ def _combine_segments(left: Segment, right: Segment) -> Segment:
         "end": right["end"],
     }
 
-
-SILENCE_DB = "-10dB"
-MIN_SEGMENT_LENGTH = 30.0
-MIN_SILENCE_LENGTH = 1.0
 
 def split_silences(
     path: str, min_segment_length: float = MIN_SEGMENT_LENGTH, min_silence_length: float = MIN_SILENCE_LENGTH

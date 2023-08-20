@@ -16,6 +16,10 @@ AUDIO_METADATA_DIR = pathlib.Path(CACHE_DIR, "audio_metadata")
 TRANSCRIPTIONS_DIR = pathlib.Path(CACHE_DIR, "transcriptions")
 # Location of modal checkpoint.
 MODEL_DIR = pathlib.Path(CACHE_DIR, "model")
+# Audio splitting parameters
+SILENCE_DB = "-10dB"
+MIN_SEGMENT_LENGTH = 30.0
+MIN_SILENCE_LENGTH = 1.0
 
 supported_whisper_models = {
     "tiny.en": ModelSpec(name="tiny.en", params="39M", relative_speed=32),

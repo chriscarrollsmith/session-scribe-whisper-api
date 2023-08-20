@@ -105,56 +105,88 @@ def transcribe_segment(
     image=app_image,
     shared_volumes={logger.CACHE_DIR: volume},
     timeout=900,
-    secrets=[
-        Secret.from_name("my-googlecloud-secret"),
-        Secret.from_name("supabase")
-    ],
 )
-def transcribe_audio(
-    audio_filepath: pathlib.Path,
-    result_path: pathlib.Path,
-    model: logger.ModelSpec,
-    unique_id: int,
-    session_title: Optional[str] = None,
-    presenters: Optional[str] = None,
-):
-    segment_gen = audio.split_silences(str(audio_filepath))
-
-    output_text = ""
-    output_segments = []
-    for result in transcribe_segment.starmap(
-        segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model)
-    ):
-        output_text += result["text"]
-        output_segments += result["segments"]
-
-    result = {
-        "text": output_text,
-        "segments": output_segments,
-        "language": "en",
-    }
-
-    logger.info(f"Writing openai/whisper transcription to {result_path}")
-    with open(result_path, "w") as f:
-        json.dump(result, f, indent=4)
+def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
+    import dacite
+    import whisper
+    import yt_dlp
 
     # Get the title slug from the unique_id
     title_slug = str(unique_id)
 
-    # Create a PDF
-    pdf_path = pdf.create_pdf(output_text, title_slug)
+    destination_path = logger.RAW_AUDIO_DIR / title_slug
 
-    # Load the secret and use it for authenticating with Google Cloud Storage
-    service_account_info = json.loads(os.environ["SERVICE_ACCOUNT_JSON"])
-    credentials = service_account.Credentials.from_service_account_info(service_account_info)
+    # Video files are converted to mp3, so we need to pass the mp3 file path.
+    audio_filepath = f"{destination_path}.mp3" if is_video else destination_path
 
-    # Upload the PDF to Gcloud and get the public url
-    public_url = gcloud.upload_to_gcloud(pdf_path, credentials)
+    try:
+        transcription_path = get_transcript_path(title_slug)
 
-    # Upsert the transcript to Supabase
-    supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, audio_filepath, public_url)
+        # pre-download the model to the cache path, because the _download fn is not
+        # thread-safe.
+        model = logger.DEFAULT_MODEL
+        whisper._download(whisper._MODELS[model.name], logger.MODEL_DIR, False)
 
-    return public_url
+        logger.RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+        logger.TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
+
+        if is_video:
+            video.download_convert_video_to_audio(
+                yt_dlp, src_url, password, destination_path
+            )
+        else:
+            audio.store_original_audio(
+                url=src_url,
+                destination=destination_path,
+            )
+
+        logger.info(
+            f"Using the {model.name} model which has {model.params} parameters."
+        )
+
+        segment_gen = audio.split_silences(str(audio_filepath))
+
+        output_text = ""
+        output_segments = []
+        for result in transcribe_segment.starmap(
+            segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model)
+        ):
+            output_text += result["text"]
+            output_segments += result["segments"]
+
+        result = {
+            "text": output_text,
+            "segments": output_segments,
+            "language": "en",
+        }
+
+        logger.info(f"Writing openai/whisper transcription to {transcription_path}")
+        with open(transcription_path, "w") as f:
+            json.dump(result, f, indent=4)
+
+        # Create a PDF
+        pdf_path = pdf.create_pdf(output_text, title_slug)
+
+        # Load the secret and use it for authenticating with Google Cloud Storage
+        service_account_info = json.loads(os.environ["SERVICE_ACCOUNT_JSON"])
+        credentials = service_account.Credentials.from_service_account_info(service_account_info)
+
+        # Upload the PDF to Gcloud and get the public url
+        public_url = gcloud.upload_to_gcloud(pdf_path, credentials)
+
+        # Upsert the transcript to Supabase
+        supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, audio_filepath, public_url)
+
+    except Exception as e:
+        logger.exception(e)
+        raise dacite.DaciteError("Failed to process audio") from e
+
+    finally:
+        logger.info(f"Deleting the audio file in '{destination_path}'")
+        os.remove(audio_filepath)
+        logger.info(f"Deleted the audio file in '{destination_path}'")
+
+    return public_url  # return the public URL of the uploaded PDF
 
 
 @stub.function(

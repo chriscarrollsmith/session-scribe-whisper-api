@@ -8,10 +8,8 @@ import pathlib
 from google.oauth2 import service_account
 from modal import Dict, Image, SharedVolume, Stub, asgi_app, Secret
 from . import audio, logger, video, gcloud, pdf, supabase
+from .transcribe import transcribe_segment
 from typing import Optional
-
-#from dotenv import load_dotenv
-#load_dotenv()
 
 logger = logger.get_logger(__name__)
 volume = SharedVolume().persist("dataset-cache-vol")
@@ -52,9 +50,6 @@ def fastapi_app():
     from .api import web_app
 
     return web_app
-
-
-from .transcribe import transcribe_segment
 
 
 @stub.function(

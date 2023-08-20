@@ -1,12 +1,10 @@
 import tempfile
 import time
-
+import pathlib
 import ffmpeg
 import torch
 import whisper
-from modal import Dict, Image, SharedVolume, Stub, asgi_app, Secret
-from . import audio, logger, video, gcloud, pdf, supabase
-from typing import Optional
+from . import logger
 
 @stub.function(
     image=app_image,

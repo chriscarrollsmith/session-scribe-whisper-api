@@ -5,6 +5,7 @@ import ffmpeg
 import torch
 import whisper
 from . import logger
+from .constants import ModelSpec, MODEL_DIR
 
 logger = logger.get_logger(__name__)
 
@@ -13,7 +14,7 @@ def transcribe_segment(
     start: float,
     end: float,
     audio_filepath: pathlib.Path,
-    model: logger.ModelSpec,
+    model: ModelSpec,
 ):
     t0 = time.time()
     with tempfile.NamedTemporaryFile(suffix=".mp3") as f:
@@ -28,7 +29,7 @@ def transcribe_segment(
         use_gpu = torch.cuda.is_available()
         device = "cuda" if use_gpu else "cpu"
         model = whisper.load_model(
-            model.name, device=device, download_root=logger.MODEL_DIR
+            model.name, device=device, download_root=MODEL_DIR
         )
         result = model.transcribe(f.name, language="en", fp16=use_gpu)  # type: ignore
 

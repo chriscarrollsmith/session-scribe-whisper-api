@@ -6,13 +6,16 @@ import json
 import os
 import pathlib
 from google.oauth2 import service_account
-from modal import Dict, Image, SharedVolume, Stub, asgi_app, Secret
+from modal import Dict, Image, NetworkFileSystem, Stub, asgi_app, Secret
 from . import audio, logger, video, gcloud, pdf, supabase
 from .transcribe import transcribe_segment
+from .constants import ( CACHE_DIR, DEFAULT_MODEL, MODEL_DIR, RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR )
 from typing import Optional
 
 logger = logger.get_logger(__name__)
-volume = SharedVolume().persist("dataset-cache-vol")
+
+# Create a persistent cache for storing logs across application runs
+volume = NetworkFileSystem().persisted("dataset-cache-vol")
 
 app_image = (
     Image.debian_slim()
@@ -33,28 +36,31 @@ app_image = (
     .pip_install("ffmpeg-python")
 )
 
+# Create a modal.Stub instance for managing the application
 stub = Stub(
     "whisper-audio-video-transcriber-api-v2",
     image=app_image,
 )
 
+# Define a dictionary object for tracking progress within the Stub
 stub.in_progress = Dict()
 
-
+# Register the FastAPI application as a function with the stub,
+# including setting shared volumes and a keep-warm strategy
 @stub.function(
-    shared_volumes={logger.CACHE_DIR: volume},
+    shared_volumes={CACHE_DIR: volume},
     keep_warm=1,
 )
 @asgi_app()
 def fastapi_app():
     from .api import web_app
-
     return web_app
 
-
+# Register the process_audio function with the stub, along with specific configurations like image, shared volumes, secrets, etc.
+# This function controls the overall flow of the application.
 @stub.function(
     image=app_image,
-    shared_volumes={logger.CACHE_DIR: volume},
+    shared_volumes={CACHE_DIR: volume},
     timeout=900,
     secrets=[
         Secret.from_name("my-googlecloud-secret"),
@@ -69,7 +75,7 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
     # Get the title slug from the unique_id
     title_slug = str(unique_id)
 
-    destination_path = logger.RAW_AUDIO_DIR / title_slug
+    destination_path = RAW_AUDIO_DIR / title_slug
 
     # Video files are converted to mp3, so we need to pass the mp3 file path.
     audio_filepath = f"{destination_path}.mp3" if is_video else destination_path
@@ -78,12 +84,12 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
         transcription_path = get_transcript_path(title_slug)
 
         # pre-download the model to the cache path, because the _download fn is not
-        # thread-safe.
-        model = logger.DEFAULT_MODEL
-        whisper._download(whisper._MODELS[model.name], logger.MODEL_DIR, False)
+        # thread-safe and can cause issues when multiple requests are made at the same time.
+        model = DEFAULT_MODEL
+        whisper._download(whisper._MODELS[model.name], MODEL_DIR, False)
 
-        logger.RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-        logger.TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
+        RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+        TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
         if is_video:
             video.download_convert_video_to_audio(
@@ -145,4 +151,4 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
 
 
 def get_transcript_path(title_slug: str) -> pathlib.Path:
-    return logger.TRANSCRIPTIONS_DIR / f"{title_slug}.json"
+    return TRANSCRIPTIONS_DIR / f"{title_slug}.json"

@@ -12,6 +12,7 @@ def transcribe_segment(
     end: float,
     audio_filepath: pathlib.Path,
     model: logger.ModelSpec,
+    logger: logging.Logger,
 ):
     t0 = time.time()
     with tempfile.NamedTemporaryFile(suffix=".mp3") as f:

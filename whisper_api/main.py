@@ -104,7 +104,7 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
         output_text = ""
         output_segments = []
         for result in transcribe_segment.starmap(
-            segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model)
+            segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model, logger=logger)
         ):
             output_text += result["text"]
             output_segments += result["segments"]

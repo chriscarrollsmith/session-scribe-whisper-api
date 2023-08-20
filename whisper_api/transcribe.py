@@ -6,11 +6,7 @@ import torch
 import whisper
 from . import logger
 
-@stub.function(
-    image=app_image,
-    shared_volumes={logger.CACHE_DIR: volume},
-    cpu=2,
-)
+
 def transcribe_segment(
     start: float,
     end: float,

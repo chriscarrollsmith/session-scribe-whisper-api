@@ -105,6 +105,10 @@ def transcribe_segment(
     image=app_image,
     shared_volumes={logger.CACHE_DIR: volume},
     timeout=900,
+    secrets=[
+        Secret.from_name("my-googlecloud-secret"),
+        Secret.from_name("supabase")
+    ]
 )
 def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
     import dacite

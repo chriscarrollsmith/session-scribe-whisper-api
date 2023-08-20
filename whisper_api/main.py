@@ -193,68 +193,6 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
     return public_url  # return the public URL of the uploaded PDF
 
 
-@stub.function(
-    image=app_image,
-    shared_volumes={logger.CACHE_DIR: volume},
-    timeout=900,
-)
-def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
-    import dacite
-    import whisper
-    import yt_dlp
-
-    # Get the title slug from the unique_id
-    title_slug = str(unique_id)
-
-    destination_path = logger.RAW_AUDIO_DIR / title_slug
-
-    # Video files are converted to mp3, so we need to pass the mp3 file path.
-    audio_filepath = f"{destination_path}.mp3" if is_video else destination_path
-
-    try:
-        transcription_path = get_transcript_path(title_slug)
-
-        # pre-download the model to the cache path, because the _download fn is not
-        # thread-safe.
-        model = logger.DEFAULT_MODEL
-        whisper._download(whisper._MODELS[model.name], logger.MODEL_DIR, False)
-
-        logger.RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-        logger.TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
-
-        if is_video:
-            video.download_convert_video_to_audio(
-                yt_dlp, src_url, password, destination_path
-            )
-        else:
-            audio.store_original_audio(
-                url=src_url,
-                destination=destination_path,
-            )
-
-        logger.info(
-            f"Using the {model.name} model which has {model.params} parameters."
-        )
-
-        public_url = transcribe_audio.call(
-            audio_filepath=audio_filepath,
-            result_path=transcription_path,
-            model=model,
-            unique_id=unique_id,
-            session_title=session_title,
-            presenters=presenters
-        )
-
-    except Exception as e:
-        logger.exception(e)
-        raise dacite.DaciteError("Failed to process audio") from e
-
-    finally:
-        logger.info(f"Deleting the audio file in '{destination_path}'")
-        os.remove(audio_filepath)
-        logger.info(f"Deleted the audio file in '{destination_path}'")
-
-    return public_url  # return the public URL of the uploaded PDF
 
 
 def get_transcript_path(title_slug: str) -> pathlib.Path:

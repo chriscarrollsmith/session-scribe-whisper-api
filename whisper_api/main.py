@@ -45,7 +45,7 @@ stub = Stub(
 # Define a dictionary object for tracking progress within the Stub
 stub.in_progress = Dict()
 
-# Register the FastAPI application as a function with the stub,
+# Import api.py and register it with the stub as an asynchronous ASGI app,
 # including setting shared volumes and a keep-warm strategy
 @stub.function(
     shared_volumes={CACHE_DIR: volume},
@@ -56,7 +56,8 @@ def fastapi_app():
     from .api import web_app
     return web_app
 
-# Register the process_audio function with the stub, along with specific configurations like image, shared volumes, secrets, etc.
+# Register the process_audio function with the stub, along with specific
+# configurations like image, shared volumes, secrets, etc.
 # This function controls the overall flow of the application.
 @stub.function(
     image=app_image,

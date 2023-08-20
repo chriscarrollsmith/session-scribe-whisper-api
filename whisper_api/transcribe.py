@@ -5,6 +5,7 @@ import ffmpeg
 import torch
 import whisper
 from . import logger
+import logging
 
 
 def transcribe_segment(

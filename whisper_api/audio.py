@@ -96,8 +96,12 @@ def _combine_segments(left: Segment, right: Segment) -> Segment:
     }
 
 
+SILENCE_DB = "-10dB"
+MIN_SEGMENT_LENGTH = 30.0
+MIN_SILENCE_LENGTH = 1.0
+
 def split_silences(
-    path: str, min_segment_length: float = 30.0, min_silence_length: float = 1.0
+    path: str, min_segment_length: float = MIN_SEGMENT_LENGTH, min_silence_length: float = MIN_SILENCE_LENGTH
 ) -> Iterator[Tuple[float, float]]:
     """Split audio file into contiguous chunks using the ffmpeg `silencedetect` filter.
     Yields tuples (start, end) of each chunk in seconds."""
@@ -115,7 +119,7 @@ def split_silences(
 
     reader = (
         ffmpeg.input(str(path))
-        .filter("silencedetect", n="-10dB", d=min_silence_length)
+        .filter("silencedetect", n=SILENCE_DB, d=min_silence_length)
         .output("pipe:", format="null")
         .run_async(pipe_stderr=True)
     )

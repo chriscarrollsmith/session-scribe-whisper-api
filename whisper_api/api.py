@@ -4,10 +4,8 @@ from .main import process_audio
 from typing import Optional
 from pydantic import BaseModel
 
-logger = logger.get_logger(__name__)
+logger = logger.get_logger(name=__name__)
 web_app = FastAPI()
-
-# Function removed
 
 class TranscriptionRequest(BaseModel):
     src_url: str
@@ -17,10 +15,10 @@ class TranscriptionRequest(BaseModel):
     is_video: Optional[bool] = False
     password: Optional[str] = None
 
-@web_app.post("/api/transcribe")
+@web_app.post(path="/api/transcribe")
 async def transcribe_and_return_job_id(
     request: TranscriptionRequest = Body(...)
-):
+) -> dict[str, str]:
     try:
         # Transcribe the audio
         call = process_audio.spawn(**request.dict())
@@ -32,8 +30,8 @@ async def transcribe_and_return_job_id(
     
     except Exception as e:
         # An unexpected error occurred, return a 500 error
-        logger.error(f"An unexpected error occurred while transcribing: {str(e)}")
+        logger.error(msg=f"An unexpected error occurred while processing your request: {str(e)}")
         raise HTTPException(
             status_code=500,  # Internal Server Error
-            detail=f"An unexpected error occurred while transcribing: {str(e)}"
+            detail=f"An unexpected error occurred while processing your request: {str(e)}"
         )

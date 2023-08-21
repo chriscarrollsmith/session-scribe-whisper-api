@@ -22,8 +22,9 @@ yt-dlp = "^2023.7.6"
 fpdf = "^1.7.2"
 google-cloud-storage = "^2.10.0"
 modal = "^0.50.2668"
-whisper = "^1.1.10"
 supabase = "^1.0.3"
+pytz = "^2023.3"
+whisper = "^1.1.10"
 
 
 [tool.poetry.group.dev.dependencies]

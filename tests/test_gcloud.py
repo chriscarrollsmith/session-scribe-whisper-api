@@ -23,18 +23,18 @@ def test_gcloud_upload_and_delete():
         tmp_path = tmp.name
 
     # Upload the file to Google Cloud Storage
-    public_url = gcloud.upload_to_gcloud(tmp_path, credentials, bucket_name)
+    gcloud.upload_to_gcloud(pdf_path=tmp_path, credentials=credentials, bucket_name=bucket_name)
 
     # Verify that the file was uploaded correctly by downloading it to a new location
     client = storage.Client(credentials=credentials)
-    bucket = client.get_bucket(bucket_name)
-    blob = bucket.blob(os.path.basename(tmp_path))
+    bucket = client.get_bucket(bucket_or_name=bucket_name)
+    blob = bucket.blob(os.path.basename(p=tmp_path))
     with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as downloaded_tmp:
-        blob.download_to_file(downloaded_tmp)
+        blob.download_to_file(file_obj=downloaded_tmp)
         downloaded_tmp_path = downloaded_tmp.name
 
     # Check if the content of the downloaded file matches the original
-    with open(downloaded_tmp_path, 'r') as file:
+    with open(file=downloaded_tmp_path, mode='r') as file:
         data = file.read()
     assert data == "This is a dummy file."
 
@@ -42,9 +42,9 @@ def test_gcloud_upload_and_delete():
     blob.delete()
 
     # Verify that the file was deleted correctly by attempting to download it again
-    with pytest.raises(Exception):
-        blob.download_to_filename(downloaded_tmp_path)
+    with pytest.raises(expected_exception=Exception):
+        blob.download_to_filename(filename=downloaded_tmp_path)
 
     # Cleanup the local dummy files
-    os.remove(tmp_path)
-    os.remove(downloaded_tmp_path)
+    os.remove(path=tmp_path)
+    os.remove(path=downloaded_tmp_path)

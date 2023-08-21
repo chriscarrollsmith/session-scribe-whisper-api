@@ -2,7 +2,7 @@ import pathlib
 
 from . import logger
 
-logger = logger.get_logger(__name__)
+logger = logger.get_logger(name=__name__)
 
 
 # List of all supported video sites here https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md
@@ -24,9 +24,9 @@ def download_convert_video_to_audio(
         "outtmpl": f"{destination_path}.%(ext)s",
     }
     try:
-        logger.info(f"Downloading video from {video_url}")
+        logger.info(msg=f"Downloading video from {video_url}")
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download(video_url)
-        logger.info(f"Downloaded video from {video_url} to {destination_path}")
+        logger.info(msg=f"Downloaded video from {video_url} to {destination_path}")
     except Exception as e:
         raise (e)

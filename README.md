@@ -29,11 +29,13 @@
 
 - [x] I want to do some pseudocode and some refactoring to make this more maintainable
 - [x] Make sure old imports from config.py now point to constants.py or logger.py
-- [ ] Implement an outgoing API endpoint here to ping a Vercel webhook when transcription is complete.
-- [ ] Make it optional to split the audio before transcribing, so we can compare transcription quality with and without splitting.
-- [ ] Explore using an LLM to format and clean up the outputs for printing.
-- [ ] Save the audio files in Google Cloud so we can serve them for download (if an event organizer chooses to do that).
-- [ ] Investigate other models or Whisper extensions that allow for time-stamping and diarization (i.e., speaker identification). In particular, see [WhisperX](https://github.com/m-bain/whisperX). Also look at [pyannote](https://github.com/pyannote/pyannote-audio) (tutorial on pyannote diarization [here](https://lablab.ai/t/whisper-transcription-and-speaker-identification)).
+- [ ] I probably should be using a Volume for file operations and logging, and return the log from the API for Supabase storage
+- [ ] Do we need to implement singleton pattern for logging or connectivity to Gcloud/Supabase?
+- [ ] Implement an outgoing API endpoint here to ping a Vercel webhook when transcription is complete
+- [ ] Make it optional to split the audio before transcribing, so we can compare transcription quality with and without splitting
+- [ ] Explore using an LLM to format and clean up the outputs for printing
+- [ ] Save the audio files in Google Cloud and put the actual storage URL in the database so we can serve them for download (if an event organizer chooses to do that)
+- [ ] Investigate other models or Whisper extensions that allow for time-stamping and diarization (i.e., speaker identification), especially [WhisperX](https://github.com/m-bain/whisperX) and [pyannote](https://github.com/pyannote/pyannote-audio) (tutorial on pyannote diarization [here](https://lablab.ai/t/whisper-transcription-and-speaker-identification)).
 
 ## How to use
 
@@ -43,7 +45,7 @@
   curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \
   --header 'Content-Type: application/json' \
   --data-raw '{
-      "src_url": "https://storage.googleapis.com/session-scribe-bucket/disciple.wav",
+      "src_url": "https://storage.googleapis.com/session-scribe-bucket/1689897654847-audio-1689897655558.mp3",
       "unique_id": 987654,
       "session_title": "Session Title Here",
       "presenters": "Presenters Here",

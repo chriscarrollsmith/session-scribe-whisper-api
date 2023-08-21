@@ -15,7 +15,7 @@ from typing import Optional
 logger = logger.get_logger(__name__)
 
 # Create a persistent cache for storing logs across application runs
-volume = NetworkFileSystem().persisted("dataset-cache-vol")
+volume = NetworkFileSystem().persisted(label="dataset-cache-vol")
 
 app_image = (
     Image.debian_slim()
@@ -30,6 +30,7 @@ app_image = (
         "yt-dlp",
         "fpdf",
         "google-cloud-storage",
+        "pytz",
         "supabase"
     )
     .apt_install("ffmpeg")

@@ -7,7 +7,7 @@ import whisper
 from . import logger
 from .constants import ModelSpec, MODEL_DIR
 
-logger = logger.get_logger(__name__)
+logger = logger.get_logger(name=__name__)
 
 
 def transcribe_segment(
@@ -19,7 +19,7 @@ def transcribe_segment(
     t0 = time.time()
     with tempfile.NamedTemporaryFile(suffix=".mp3") as f:
         (
-            ffmpeg.input(str(audio_filepath))
+            ffmpeg.input(filename=str(audio_filepath))
             .filter("atrim", start=start, end=end)
             .output(f.name)
             .overwrite_output()
@@ -29,15 +29,15 @@ def transcribe_segment(
         use_gpu = torch.cuda.is_available()
         device = "cuda" if use_gpu else "cpu"
         model = whisper.load_model(
-            model.name, device=device, download_root=MODEL_DIR
+            name=model.name, device=device, download_root=MODEL_DIR
         )
         result = model.transcribe(f.name, language="en", fp16=use_gpu)  # type: ignore
 
     logger.info(
-        f"Transcribed segment {start:.2f} to {end:.2f} of {end - start:.2f} in {time.time() - t0:.2f} seconds."
+        msg=f"Transcribed segment {start:.2f} to {end:.2f} of {end - start:.2f} in {time.time() - t0:.2f} seconds."
     )
 
-    # Add back offsets.
+    # Add back offsets
     for segment in result["segments"]:
         segment["start"] += start
         segment["end"] += start

@@ -31,11 +31,12 @@
 - [x] Make sure old imports from config.py now point to constants.py or logger.py
 - [x] Save the audio files in Google Cloud and put the actual storage URL in the database so we can serve them for download (if an event organizer chooses to do that)
 - [ ] Make sure `audio.py` cleans up all working files with a try-finally block
-- [ ] Do we need to implement singleton pattern for logging or connectivity to Gcloud/Supabase?
+- [ ] Make it optional to split the audio before transcribing so we can compare transcription quality with and without splitting (setting is theoretically controllable via API argument or Supabase query)
 - [ ] Implement an outgoing API endpoint here to ping a Vercel webhook when transcription is complete
 - [ ] Pass logs to the outgoing API endpoint and/or store them in Supabase, then make sure any log files are cleaned up
-- [ ] Make it optional to split the audio before transcribing so we can compare transcription quality with and without splitting
 - [ ] Explore using an LLM to format and clean up the outputs for printing
+- [ ] Do we need to implement singleton pattern for logging or connectivity to Gcloud/Supabase?
+- [ ] Update the pseudocode to reflect changes to the code
 - [ ] Investigate other models or Whisper extensions that allow for time-stamping and diarization (i.e., speaker identification), especially [WhisperX](https://github.com/m-bain/whisperX) and [pyannote](https://github.com/pyannote/pyannote-audio) (tutorial on pyannote diarization [here](https://lablab.ai/t/whisper-transcription-and-speaker-identification)).
 
 ## How to use

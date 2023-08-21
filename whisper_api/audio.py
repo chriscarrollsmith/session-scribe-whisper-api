@@ -38,7 +38,7 @@ def download_audio_file(url: str) -> DownloadResult:
         },
     )
     # Open the URL and return the response data and content type
-    with urllib.request.urlopen(req) as response:
+    with urllib.request.urlopen(url=req) as response:
         return DownloadResult(
             data=response.read(),
             content_type=response.headers["content-type"],
@@ -72,6 +72,7 @@ def store_original_audio(
     audio_download_result = download_audio_file(url=url)
     humanized_bytes_str = format_file_size(num=len(audio_download_result.data))
     logger.info(msg=f"Downloaded {humanized_bytes_str} audio from URL.")
+    
     # Write the downloaded data to the destination file
     with open(file=destination, mode="wb") as f:
         f.write(audio_download_result.data)
@@ -122,12 +123,12 @@ def split_silences(
 
     # Define regex to match silence end and duration
     silence_end_re = re.compile(
-        r" silence_end: (?P<end>[0-9]+(\.?[0-9]*)) \| silence_duration: (?P<dur>[0-9]+(\.?[0-9]*))"
+        pattern=r" silence_end: (?P<end>[0-9]+(\.?[0-9]*)) \| silence_duration: (?P<dur>[0-9]+(\.?[0-9]*))"
     )
 
     # Get metadata of the audio file
     metadata = ffmpeg.probe(filename=path)
-    duration = float(metadata["format"]["duration"])
+    duration = float(__x=metadata["format"]["duration"])
 
     # Create a ffmpeg reader object
     reader = (

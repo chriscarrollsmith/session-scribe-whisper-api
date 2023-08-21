@@ -19,7 +19,7 @@ def transcribe_segment(
     t0 = time.time()
     with tempfile.NamedTemporaryFile(suffix=".mp3") as f:
         (
-            ffmpeg.input(filename=str(audio_filepath))
+            ffmpeg.input(filename=str(object=audio_filepath))
             .filter("atrim", start=start, end=end)
             .output(f.name)
             .overwrite_output()

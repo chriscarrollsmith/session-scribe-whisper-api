@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "whisper-api"
-version = "0.1.0"
+version = "0.1.1"
 description = "Backend for a transcribe-to-print pipeline called SessionScribe"
 authors = ["Christopher Carroll Smith <75859865+chriscarrollsmith@users.noreply.github.com>"]
 readme = "README.md"
 packages = [
-  {include = "api"},
+  {include = "whisper_api"},
   {include = "tests"}
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "3.10.*"
+numba = "^0.57.1"
 dacite = "^1.8.1"
 jiwer = "^3.0.2"
 ffmpeg-python = "^0.2.0"
@@ -24,14 +25,11 @@ google-cloud-storage = "^2.10.0"
 modal = "^0.50.2668"
 supabase = "^1.0.3"
 pytz = "^2023.3"
-whisper = "^1.1.10"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
 python-dotenv = "^1.0.0"
-epson-connect = "^0.2.3"
-uvicorn = "^0.23.1"
 
 [build-system]
 requires = ["poetry-core"]

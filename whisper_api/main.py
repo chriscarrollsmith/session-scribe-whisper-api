@@ -5,22 +5,26 @@ of audio, and Modal for easy containerized deployment of the app.
 import json
 import os
 import pathlib
-from google.oauth2 import service_account
-from modal import Dict, Image, NetworkFileSystem, Stub, asgi_app, Secret
-from . import audio, logger, video, gcloud, pdf, supabase
-from .transcribe import transcribe_segment
-from .constants import ( CACHE_DIR, DEFAULT_MODEL, MODEL_DIR, RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR )
 from typing import Optional
+from fastapi import FastAPI
+from modal import Dict, Image, NetworkFileSystem, Stub, asgi_app, Secret
+from . import audio, logger, video, gcloud, pdf, supabase, transcribe
+from .constants import ( CACHE_DIR, DEFAULT_MODEL, MODEL_DIR, RAW_AUDIO_DIR,
+                        TRANSCRIPTIONS_DIR )
 
-logger = logger.get_logger(__name__)
+
+logger = logger.get_logger(name=__name__)
 
 # Create a persistent cache for storing logs across application runs
-volume = NetworkFileSystem().persisted(label="dataset-cache-vol")
+volume = NetworkFileSystem.persisted(label="dataset-cache-vol")
 
 app_image = (
-    Image.debian_slim()
+    Image.debian_slim("3.11")
     .pip_install(
-        "https://github.com/openai/whisper/archive/9f70a352f9f8630ab3aa0d06af5cb9532bd8c21d.tar.gz",
+        "numba>=0.57.1",
+        "fastapi",
+        "pydantic>=2.2.1",
+        "openai-whisper",
         "dacite",
         "jiwer",
         "gql[all]~=3.0.0a5",
@@ -31,7 +35,7 @@ app_image = (
         "fpdf",
         "google-cloud-storage",
         "pytz",
-        "supabase"
+        "supabase>=1.0.3"
     )
     .apt_install("ffmpeg")
     .pip_install("ffmpeg-python")
@@ -39,43 +43,45 @@ app_image = (
 
 # Create a modal.Stub instance for managing the application
 stub = Stub(
-    "whisper-audio-video-transcriber-api-v2",
+    name="whisper-audio-video-transcriber-api-v2",
     image=app_image,
 )
 
 # Define a dictionary object for tracking progress within the Stub
-stub.in_progress = Dict()
+stub.in_progress = Dict.new()
 
 # Import api.py and register it with the stub as an asynchronous ASGI app,
 # including setting shared volumes and a keep-warm strategy
 @stub.function(
-    shared_volumes={CACHE_DIR: volume},
-    keep_warm=1,
+    network_file_systems={CACHE_DIR: volume},
+    keep_warm=1
 )
 @asgi_app()
-def fastapi_app():
+def fastapi_app() -> FastAPI:
     from .api import web_app
     return web_app
+
 
 # Register the process_audio function with the stub, along with specific
 # configurations like image, shared volumes, secrets, etc.
 # This function controls the overall flow of the application.
 @stub.function(
     image=app_image,
-    shared_volumes={CACHE_DIR: volume},
+    network_file_systems={CACHE_DIR: volume},
     timeout=900,
     secrets=[
-        Secret.from_name("my-googlecloud-secret"),
-        Secret.from_name("supabase")
+        Secret.from_name(app_name="my-googlecloud-secret"),
+        Secret.from_name(app_name="supabase")
     ]
 )
-def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None):
+def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = None, presenters: Optional[str] = None, is_video: bool=False, password: str=None) -> str:
     import dacite
     import whisper
     import yt_dlp
-
+    from google.oauth2 import service_account
+    
     # Get the title slug from the unique_id
-    title_slug = str(unique_id)
+    title_slug = str(object=unique_id)
 
     destination_path = RAW_AUDIO_DIR / title_slug
 
@@ -83,19 +89,19 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
     audio_filepath = f"{destination_path}.mp3" if is_video else destination_path
 
     try:
-        transcription_path = get_transcript_path(title_slug)
+        transcription_path = get_transcript_path(title_slug=title_slug)
 
         # pre-download the model to the cache path, because the _download fn is not
         # thread-safe and can cause issues when multiple requests are made at the same time.
         model = DEFAULT_MODEL
-        whisper._download(whisper._MODELS[model.name], MODEL_DIR, False)
+        whisper._download(url=whisper._MODELS[model.name], root=MODEL_DIR, in_memory=False)
 
         RAW_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
         TRANSCRIPTIONS_DIR.mkdir(parents=True, exist_ok=True)
 
         if is_video:
             video.download_convert_video_to_audio(
-                yt_dlp, src_url, password, destination_path
+                yt_dlp=yt_dlp, video_url=src_url, password=password, destination_path=destination_path
             )
         else:
             audio.store_original_audio(
@@ -104,14 +110,14 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
             )
 
         logger.info(
-            f"Using the {model.name} model which has {model.params} parameters."
+            msg=f"Using the {model.name} model which has {model.params} parameters."
         )
 
-        segment_gen = audio.split_silences(str(audio_filepath))
+        segment_gen = audio.split_silences(path=str(audio_filepath))
 
         output_text = ""
         output_segments = []
-        for result in transcribe_segment.starmap(
+        for result in transcribe_segment_wrapper.starmap(
             segment_gen, kwargs=dict(audio_filepath=audio_filepath, model=model)
         ):
             output_text += result["text"]
@@ -123,33 +129,43 @@ def process_audio(src_url: str, unique_id: int, session_title: Optional[str] = N
             "language": "en",
         }
 
-        logger.info(f"Writing openai/whisper transcription to {transcription_path}")
-        with open(transcription_path, "w") as f:
-            json.dump(result, f, indent=4)
+        logger.info(msg=f"Writing openai/whisper transcription to {transcription_path}")
+        with open(file=transcription_path, mode="w") as f:
+            json.dump(obj=result, fp=f, indent=4)
 
         # Create a PDF
-        pdf_path = pdf.create_pdf(output_text, title_slug)
+        pdf_path = pdf.create_pdf(transcript=output_text, title_slug=title_slug)
 
         # Load the secret and use it for authenticating with Google Cloud Storage
-        service_account_info = json.loads(os.environ["SERVICE_ACCOUNT_JSON"])
-        credentials = service_account.Credentials.from_service_account_info(service_account_info)
+        service_account_info = json.loads(s=os.environ["SERVICE_ACCOUNT_JSON"])
+        credentials = service_account.Credentials.from_service_account_info(info=service_account_info)
 
         # Upload the PDF to Gcloud and get the public url
-        public_url = gcloud.upload_to_gcloud(pdf_path, credentials)
+        public_url = gcloud.upload_to_gcloud(pdf_path=pdf_path, credentials=credentials)
 
         # Upsert the transcript to Supabase
-        supabase.supabase_upsert(unique_id, session_title if session_title else title_slug, presenters if presenters else "Unknown", output_text, audio_filepath, public_url)
+        supabase.supabase_upsert(unique_id=unique_id, session_name=session_title if session_title else title_slug, presenters=presenters if presenters else "Unknown", transcript_text=output_text, audio_file_path=audio_filepath, transcript_file_path=public_url)
 
     except Exception as e:
-        logger.exception(e)
+        logger.exception(msg=e)
         raise dacite.DaciteError("Failed to process audio") from e
 
     finally:
-        logger.info(f"Deleting the audio file in '{destination_path}'")
-        os.remove(audio_filepath)
-        logger.info(f"Deleted the audio file in '{destination_path}'")
+        logger.info(msg=f"Deleting the audio file in '{destination_path}'")
+        os.remove(path=audio_filepath)
+        logger.info(msg=f"Deleted the audio file in '{destination_path}'")
 
     return public_url  # return the public URL of the uploaded PDF
+
+
+# Register the transcribe_segment function with the stub
+@stub.function(
+    image=app_image,
+    network_file_systems={CACHE_DIR: volume},
+    cpu=2
+)
+def transcribe_segment_wrapper(*args, **kwargs):
+    return transcribe.transcribe_segment(*args, **kwargs)
 
 
 def get_transcript_path(title_slug: str) -> pathlib.Path:

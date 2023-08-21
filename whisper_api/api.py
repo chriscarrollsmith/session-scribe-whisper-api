@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Body, HTTPException
 from . import logger
 from .main import process_audio
 from typing import Optional
+from fastapi import FastAPI, Body, HTTPException
 from pydantic import BaseModel
 
 logger = logger.get_logger(name=__name__)
@@ -17,11 +17,11 @@ class TranscriptionRequest(BaseModel):
 
 @web_app.post(path="/api/transcribe")
 async def transcribe_and_return_job_id(
-    request: TranscriptionRequest = Body(...)
+    request: TranscriptionRequest = Body(default=...)
 ) -> dict[str, str]:
     try:
         # Transcribe the audio
-        call = process_audio.spawn(**request.dict())
+        call = process_audio.spawn(**request.model_dump())
         
         # Assuming `call` has an 'object_id' attribute to track the job
         job_id = call.object_id

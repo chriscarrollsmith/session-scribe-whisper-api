@@ -13,7 +13,7 @@ def supabase_upsert(unique_id: str, session_name: str, presenters: str, transcri
     audio_file_path = str(audio_file_path)
     transcript_file_path = str(transcript_file_path)
     
-    utc_now = datetime.now(pytz.utc)
+    utc_now = datetime.now(tz=pytz.utc)
     created_at = utc_now.isoformat()
 
     try:
@@ -34,6 +34,7 @@ def supabase_upsert(unique_id: str, session_name: str, presenters: str, transcri
         return data
     except Exception as e:
         raise Exception(str(object=e))
+
 
 def supabase_delete(unique_id: str) -> tuple[str, any]:
     # Initialize Supabase client

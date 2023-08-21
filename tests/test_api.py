@@ -1,7 +1,7 @@
 import requests
 
 
-def test_transcribe_endpoint():
+def test_transcribe_endpoint() -> None:
     # Define the URL
     url = 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe'
 
@@ -20,7 +20,7 @@ def test_transcribe_endpoint():
     }
 
     # Make the POST request
-    response = requests.post(url, json=data, headers=headers)
+    response = requests.post(url=url, json=data, headers=headers)
 
     # Assert that the response code is 200
     assert response.status_code == 200

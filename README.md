@@ -22,7 +22,7 @@
 2. Deploy your modal project with the following command.
 
    ```bash
-   modal deploy api.main
+   modal deploy whisper_api.main
    ```
 
 ### To-do items

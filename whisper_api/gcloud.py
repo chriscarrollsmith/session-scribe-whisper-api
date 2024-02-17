@@ -1,7 +1,7 @@
 from google.cloud import storage
 import os
 
-def upload_to_gcloud(path: str, credentials, bucket_name: str = 'session-scribe-bucket') -> str:
+def upload_to_gcloud(path: str, credentials, bucket_name: str = os.environ[os.environ["BUCKET_NAME])) -> str:
     """
     Uploads a file to a specified Google Cloud Storage bucket.
 

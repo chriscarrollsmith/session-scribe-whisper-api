@@ -1,5 +1,7 @@
 # Fast Audio/Video transcribe using Openai's Whisper and Modal
 
+Backend for a third-place project from the August 2023 Epson Innovation Challenge hackathon, created by Christopher Smith and Kevin Mora. Meant to be used in combination with our [Javascript frontend](https://github.com/chriscarrollsmith/session-scribe). Based on ["Fast Audio/Video transcribe using Openai's Whisper and Modal"](https://github.com/mharrvic/fast-audio-video-transcribe-with-whisper-and-modal) by `mharrvic`.
+
 ## Powered by Modal.com for parallel processing on-demand, an hour audio file can be transcribed in ~1 minute.
 
 "Modal’s dead-simple parallelism primitives are the key to doing the transcription so quickly. Even with a GPU, transcribing a full episode serially was taking around 10 minutes. But by pulling in ffmpeg with a simple .pip_install("ffmpeg-python") addition to our Modal Image, we could exploit the natural silences of the podcast medium to partition episodes into hundreds of short segments. Each segment is transcribed by Whisper in its own container task with 2 physical CPU cores, and when all are done we stitch the segments back together with only a minimal loss in transcription quality. This approach actually accords quite well with Whisper’s model architecture." The model uses 30-second chunking.
@@ -44,10 +46,10 @@
 1. Transcribe your audio file using the following curl command. The 'transcribe' endpoint wants a JSON formatted request:
 
   ```curl
-  curl --location --request POST 'https://chriscarrollsmith--whisper-audio-video-transcriber-api-v-4c6a21.modal.run/api/transcribe' \
+  curl --location --request POST 'https://your-domain.modal.run/api/transcribe' \
   --header 'Content-Type: application/json' \
   --data-raw '{
-      "src_url": "https://storage.googleapis.com/session-scribe-bucket/1689897654847-audio-1689897655558.mp3",
+      "src_url": "https://storage.googleapis.com/your-bucket/filename.mp3",
       "unique_id": 987654,
       "session_title": "Session Title Here",
       "presenters": "Presenters Here",
